@@ -1,3 +1,2 @@
 [phases.setup]
 nixPkgs = ["gcc"]
-cmds = ["bash -c 'GOMP=$(find /nix/store -name libgomp.so.1 2>/dev/null | head -1) && [ -n \"$GOMP\" ] && ln -sf \"$GOMP\" /usr/lib/libgomp.so.1 || true'"]
