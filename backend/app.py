@@ -117,7 +117,7 @@ if PAPER_BETS_FILE.exists():
     with open(PAPER_BETS_FILE) as f:
         PAPER_BETS = json.load(f)
 
-log.info(f"Loaded: {len(PLAYERS):,} players, {len(ELO):,} Elo ratings, {len(STATS):,} stats, {len(MATCHES):,} matches")
+log.info(f"Loaded: {len(PLAYERS):,} players, {len(ELO):,} Elo ratings, {len(STATS):,} stats, H2H via SQLite")
 
 # ============================================================
 # APP
