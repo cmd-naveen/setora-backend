@@ -230,7 +230,7 @@ app = FastAPI(
 )
 
 # CORS — production origins + localhost for dev
-_default_origins = "https://setora.pro,https://www.setora.pro,https://setora.pages.dev,http://localhost:5173,http://localhost:4173"
+_default_origins = "https://setora.pro,https://www.setora.pro,https://setora.pages.dev,https://setora.naveenkmrrr.workers.dev,http://localhost:5173,http://localhost:4173"
 _ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", _default_origins).split(",")
 app.add_middleware(
     CORSMiddleware,
