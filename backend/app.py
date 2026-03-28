@@ -56,68 +56,109 @@ MODEL_DIR = PROJECT_DIR / "models" / "output"
 MATCHES_DB = DATA_DIR / "matches.db"  # SQLite H2H database (replaces 145MB CSV)
 
 # ============================================================
-# LOAD DATA & MODEL AT STARTUP
+# LOAD DATA & MODEL AT STARTUP  (all wrapped — never crash on Railway)
 # ============================================================
-log.info("Loading model and data...")
+CACHE_DIR = BASE_DIR / "cache"
+_STARTUP_ERRORS: list = []
+
+log.info(f"BASE_DIR={BASE_DIR}  DATA_DIR={DATA_DIR}  MODEL_DIR={MODEL_DIR}")
 
 # Model
-with open(MODEL_DIR / "tennis_model.pkl", "rb") as f:
-    MODEL = pickle.load(f)
+MODEL = None
+MODEL_META: dict = {"features": [], "best_iteration": 0, "model_type": "unknown"}
+FEATURE_COLS: list = []
+BEST_ITERATION = 0
+try:
+    with open(MODEL_DIR / "tennis_model.pkl", "rb") as f:
+        MODEL = pickle.load(f)
+    with open(MODEL_DIR / "model_meta.json") as f:
+        MODEL_META = json.load(f)
+    FEATURE_COLS = MODEL_META.get("features", [])
+    BEST_ITERATION = MODEL_META.get("best_iteration", 0)
+    log.info(f"Model loaded: {MODEL_META.get('model_type')} ({len(FEATURE_COLS)} features)")
+except Exception as e:
+    _STARTUP_ERRORS.append(f"model: {e}")
+    log.error(f"Model load failed (predictions disabled): {e}")
 
-with open(MODEL_DIR / "model_meta.json") as f:
-    MODEL_META = json.load(f)
+# Player data
+PLAYERS = pd.DataFrame()
+try:
+    PLAYERS = pd.read_csv(DATA_DIR / "players.csv", low_memory=False)
+    PLAYERS["full_name"] = (PLAYERS["name_first"].fillna("") + " " + PLAYERS["name_last"].fillna("")).str.strip()
+    PLAYERS["player_id"] = PLAYERS["player_id"].astype(int)
+    log.info(f"Players loaded: {len(PLAYERS):,}")
+except Exception as e:
+    _STARTUP_ERRORS.append(f"players.csv: {e}")
+    log.error(f"players.csv load failed: {e}")
 
-FEATURE_COLS = MODEL_META["features"]
-BEST_ITERATION = MODEL_META["best_iteration"]
-
-# Player data (full set for H2H lookups)
-PLAYERS = pd.read_csv(DATA_DIR / "players.csv", low_memory=False)
-PLAYERS["full_name"] = (PLAYERS["name_first"].fillna("") + " " + PLAYERS["name_last"].fillna("")).str.strip()
-PLAYERS["player_id"] = PLAYERS["player_id"].astype(int)
-
-# Active players index (from refresh_data.py)
-CACHE_DIR = BASE_DIR / "cache"
-ACTIVE_PLAYERS = []
-ACTIVE_DICT = {}  # player_id → active player data
-if (CACHE_DIR / "active_players.json").exists():
-    with open(CACHE_DIR / "active_players.json") as f:
-        ACTIVE_PLAYERS = json.load(f)
-    ACTIVE_DICT = {p["player_id"]: p for p in ACTIVE_PLAYERS}
-    log.info(f"  Active players: {len(ACTIVE_PLAYERS)}")
+# Active players index
+ACTIVE_PLAYERS: list = []
+ACTIVE_DICT: dict = {}
+try:
+    if (CACHE_DIR / "active_players.json").exists():
+        with open(CACHE_DIR / "active_players.json") as f:
+            ACTIVE_PLAYERS = json.load(f)
+        ACTIVE_DICT = {p["player_id"]: p for p in ACTIVE_PLAYERS}
+        log.info(f"Active players: {len(ACTIVE_PLAYERS)}")
+except Exception as e:
+    _STARTUP_ERRORS.append(f"active_players.json: {e}")
+    log.error(f"active_players.json load failed: {e}")
 
 # Recent matches feed
-RECENT_MATCHES = []
-if (CACHE_DIR / "recent_matches.json").exists():
-    with open(CACHE_DIR / "recent_matches.json") as f:
-        RECENT_MATCHES = json.load(f)
+RECENT_MATCHES: list = []
+try:
+    if (CACHE_DIR / "recent_matches.json").exists():
+        with open(CACHE_DIR / "recent_matches.json") as f:
+            RECENT_MATCHES = json.load(f)
+        log.info(f"Recent matches: {len(RECENT_MATCHES)}")
+except Exception as e:
+    _STARTUP_ERRORS.append(f"recent_matches.json: {e}")
+    log.error(f"recent_matches.json load failed: {e}")
 
-# Name→ID lookup for cross-source matching
-NAME_TO_ID = {}
-if (CACHE_DIR / "name_to_id.json").exists():
-    with open(CACHE_DIR / "name_to_id.json") as f:
-        NAME_TO_ID = {k: int(v) for k, v in json.load(f).items()}
+# Name→ID lookup
+NAME_TO_ID: dict = {}
+try:
+    if (CACHE_DIR / "name_to_id.json").exists():
+        with open(CACHE_DIR / "name_to_id.json") as f:
+            NAME_TO_ID = {k: int(v) for k, v in json.load(f).items()}
+except Exception as e:
+    log.warning(f"name_to_id.json load failed: {e}")
 
 # Elo ratings
-ELO = pd.read_csv(DATA_DIR / "elo_ratings.csv", low_memory=False)
-ELO["player_id"] = ELO["player_id"].astype(int)
-ELO_DICT = ELO.set_index("player_id").to_dict("index")
+ELO = pd.DataFrame()
+ELO_DICT: dict = {}
+try:
+    ELO = pd.read_csv(DATA_DIR / "elo_ratings.csv", low_memory=False)
+    ELO["player_id"] = ELO["player_id"].astype(int)
+    ELO_DICT = ELO.set_index("player_id").to_dict("index")
+    log.info(f"Elo ratings: {len(ELO):,}")
+except Exception as e:
+    _STARTUP_ERRORS.append(f"elo_ratings.csv: {e}")
+    log.error(f"elo_ratings.csv load failed: {e}")
 
 # Player stats
-STATS = pd.read_csv(DATA_DIR / "player_stats.csv", low_memory=False)
-STATS["player_id"] = STATS["player_id"].astype(int)
-STATS_DICT = STATS.set_index("player_id").to_dict("index")
+STATS = pd.DataFrame()
+STATS_DICT: dict = {}
+try:
+    STATS = pd.read_csv(DATA_DIR / "player_stats.csv", low_memory=False)
+    STATS["player_id"] = STATS["player_id"].astype(int)
+    STATS_DICT = STATS.set_index("player_id").to_dict("index")
+    log.info(f"Player stats: {len(STATS):,}")
+except Exception as e:
+    _STARTUP_ERRORS.append(f"player_stats.csv: {e}")
+    log.error(f"player_stats.csv load failed: {e}")
 
-# H2H — queries go through SQLite (matches.db) instead of a 145MB CSV in memory
-# MATCHES_DB path defined above; connections are opened per-request (thread-safe)
-
-# Paper bets storage (in-memory + file persistence)
+# Paper bets storage
 PAPER_BETS_FILE = BASE_DIR / "paper_bets.json"
 PAPER_BETS: List[dict] = []
-if PAPER_BETS_FILE.exists():
-    with open(PAPER_BETS_FILE) as f:
-        PAPER_BETS = json.load(f)
+try:
+    if PAPER_BETS_FILE.exists():
+        with open(PAPER_BETS_FILE) as f:
+            PAPER_BETS = json.load(f)
+except Exception as e:
+    log.warning(f"paper_bets.json load failed: {e}")
 
-log.info(f"Loaded: {len(PLAYERS):,} players, {len(ELO):,} Elo ratings, {len(STATS):,} stats, H2H via SQLite")
+log.info(f"Startup complete. Errors: {_STARTUP_ERRORS if _STARTUP_ERRORS else 'none'}")
 
 # ============================================================
 # APP
@@ -532,12 +573,13 @@ def refresh_status():
 def health():
     return {
         "status": "ok",
-        "model": MODEL_META["model_type"],
-        "train_years": MODEL_META["train_years"],
+        "model": MODEL_META.get("model_type", "not loaded"),
+        "model_loaded": MODEL is not None,
         "players": len(PLAYERS),
         "active_players": len(ACTIVE_PLAYERS),
         "recent_matches": len(RECENT_MATCHES),
         "paper_bets": len(PAPER_BETS),
+        "startup_errors": _STARTUP_ERRORS,
     }
 
 
