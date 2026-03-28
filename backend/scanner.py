@@ -10,6 +10,7 @@ Can run on a schedule (every 30 min) or be triggered manually.
 
 import json
 import pickle
+import sqlite3
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -18,8 +19,9 @@ from odds_fetcher import fetch_live_odds, get_cached_odds, match_odds_to_players
 
 BASE_DIR = Path(__file__).parent
 PROJECT_DIR = BASE_DIR.parent
-DATA_DIR = PROJECT_DIR / "data-pipeline" / "data" / "processed"
+DATA_DIR = BASE_DIR / "data"               # small CSVs committed to repo
 MODEL_DIR = PROJECT_DIR / "models" / "output"
+MATCHES_DB = DATA_DIR / "matches.db"       # SQLite H2H (replaces 145MB CSV)
 CACHE_DIR = BASE_DIR / "cache"
 
 # ============================================================
@@ -58,10 +60,6 @@ def load_player_data():
     players = pd.read_csv(DATA_DIR / "players.csv", low_memory=False)
     players["full_name"] = (players["name_first"].fillna("") + " " + players["name_last"].fillna("")).str.strip()
 
-    matches = pd.read_csv(DATA_DIR / "matches_clean.csv", low_memory=False,
-                           usecols=["winner_id", "loser_id", "tourney_date"])
-    matches["tourney_date"] = pd.to_datetime(matches["tourney_date"], errors="coerce")
-
     return {
         "active": active,
         "active_dict": active_dict,
@@ -69,7 +67,6 @@ def load_player_data():
         "elo_dict": elo_dict,
         "stats_dict": stats_dict,
         "players": players,
-        "matches": matches,
     }
 
 
@@ -105,10 +102,19 @@ def build_features_for_match(p1_id, p2_id, surface, tour, best_of,
     p1_rank_pts = ap1.get("rank_points") or 0
     p2_rank_pts = ap2.get("rank_points") or 0
 
-    # H2H
-    m = data["matches"]
-    h2h_p1 = len(m[(m["winner_id"] == p1_id) & (m["loser_id"] == p2_id)])
-    h2h_p2 = len(m[(m["winner_id"] == p2_id) & (m["loser_id"] == p1_id)])
+    # H2H from SQLite
+    h2h_p1 = h2h_p2 = 0
+    if MATCHES_DB.exists():
+        try:
+            conn = sqlite3.connect(MATCHES_DB)
+            cur = conn.cursor()
+            cur.execute("SELECT COUNT(*) FROM matches WHERE winner_id=? AND loser_id=?", (p1_id, p2_id))
+            h2h_p1 = cur.fetchone()[0]
+            cur.execute("SELECT COUNT(*) FROM matches WHERE winner_id=? AND loser_id=?", (p2_id, p1_id))
+            h2h_p2 = cur.fetchone()[0]
+            conn.close()
+        except Exception:
+            pass
     h2h_total = h2h_p1 + h2h_p2
     h2h_pct = h2h_p1 / h2h_total if h2h_total > 0 else 0.5
 
