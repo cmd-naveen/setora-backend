@@ -7,6 +7,7 @@ Usage:
 """
 
 import json
+import sqlite3
 import requests
 import pandas as pd
 import numpy as np
@@ -15,12 +16,12 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 
 BASE_DIR = Path(__file__).parent
-PROJECT_DIR = BASE_DIR.parent
-DATA_DIR = PROJECT_DIR / "data-pipeline" / "data"
-RAW_DIR = DATA_DIR / "raw"
-PROCESSED_DIR = DATA_DIR / "processed"
+DATA_DIR = BASE_DIR / "data"
+RAW_DIR = BASE_DIR / "cache" / "raw"
 CACHE_DIR = BASE_DIR / "cache"
 CACHE_DIR.mkdir(exist_ok=True)
+RAW_DIR.mkdir(parents=True, exist_ok=True)
+MATCHES_DB = DATA_DIR / "matches.db"
 
 TML_BASE = "https://stats.tennismylife.org/data"
 SACKMANN_WTA_BASE = "https://raw.githubusercontent.com/JeffSackmann/tennis_wta/master"
@@ -29,10 +30,12 @@ print("=== Refreshing live data ===")
 
 # ── 1. Download fresh data ──
 print("Downloading ongoing tournaments...")
+tml_dir = RAW_DIR / "tennismylife"
+tml_dir.mkdir(parents=True, exist_ok=True)
 try:
     r = requests.get(f"{TML_BASE}/ongoing_tourneys.csv", timeout=30)
     if r.status_code == 200:
-        (RAW_DIR / "tennismylife" / "ongoing_tourneys.csv").write_bytes(r.content)
+        (tml_dir / "ongoing_tourneys.csv").write_bytes(r.content)
         print(f"  ongoing_tourneys.csv updated ({len(r.content)} bytes)")
 except Exception as e:
     print(f"  Failed: {e}")
@@ -43,7 +46,7 @@ for fname in ["2025.csv", "2026.csv", "2026_challenger.csv"]:
     try:
         r = requests.get(f"{TML_BASE}/{fname}", timeout=30)
         if r.status_code == 200 and len(r.content) > 100:
-            (RAW_DIR / "tennismylife" / fname).write_bytes(r.content)
+            (tml_dir / fname).write_bytes(r.content)
             print(f"  {fname} updated ({len(r.content)} bytes)")
         else:
             print(f"  {fname}: not available or empty")
@@ -80,12 +83,22 @@ for fname in ["wta_matches_2026.csv"]:
 # ── 2. Build active players index ──
 print("\nBuilding active players index...")
 
-# Load the main processed matches
-matches = pd.read_csv(PROCESSED_DIR / "matches_clean.csv", low_memory=False,
-    usecols=["winner_id", "loser_id", "winner_name", "loser_name",
-             "tourney_date", "tourney_name", "surface", "round",
-             "winner_rank", "loser_rank", "winner_rank_points", "loser_rank_points",
-             "score", "tour"])
+# Load the main matches from SQLite (was matches_clean.csv, now matches.db)
+if MATCHES_DB.exists():
+    conn = sqlite3.connect(MATCHES_DB)
+    matches = pd.read_sql(
+        "SELECT winner_id, loser_id, winner_name, loser_name, "
+        "tourney_date, tourney_name, surface, round, "
+        "winner_rank, loser_rank, winner_rank_points, loser_rank_points, "
+        "score, tour FROM matches", conn)
+    conn.close()
+    print(f"  Loaded {len(matches)} matches from SQLite")
+else:
+    matches = pd.DataFrame(columns=["winner_id", "loser_id", "winner_name", "loser_name",
+        "tourney_date", "tourney_name", "surface", "round",
+        "winner_rank", "loser_rank", "winner_rank_points", "loser_rank_points",
+        "score", "tour"])
+    print("  WARNING: matches.db not found")
 matches["tourney_date"] = pd.to_datetime(matches["tourney_date"], errors="coerce")
 matches = matches.dropna(subset=["tourney_date"])
 
@@ -120,7 +133,7 @@ if wta_fresh_frames:
 
 # Load TML ongoing tournaments
 ongoing = pd.DataFrame()
-ongoing_path = RAW_DIR / "tennismylife" / "ongoing_tourneys.csv"
+ongoing_path = tml_dir / "ongoing_tourneys.csv"
 if ongoing_path.exists():
     ongoing = pd.read_csv(ongoing_path, low_memory=False)
     if "tourney_date" in ongoing.columns:
@@ -129,7 +142,7 @@ if ongoing_path.exists():
 # Load TML 2025/2026 data for additional ATP matches
 tml_frames = []
 for fname in ["2025.csv", "2026.csv", "2026_challenger.csv"]:
-    p = RAW_DIR / "tennismylife" / fname
+    p = tml_dir / fname
     if p.exists():
         try:
             df = pd.read_csv(p, low_memory=False)
@@ -143,7 +156,7 @@ for fname in ["2025.csv", "2026.csv", "2026_challenger.csv"]:
             print(f"  Error loading {fname}: {e}")
 
 # Load players
-players = pd.read_csv(PROCESSED_DIR / "players.csv", low_memory=False)
+players = pd.read_csv(DATA_DIR / "players.csv", low_memory=False)
 players["full_name"] = (players["name_first"].fillna("") + " " + players["name_last"].fillna("")).str.strip()
 
 # Build name→player_id lookup for cross-source matching
@@ -210,11 +223,11 @@ matches = matches.drop_duplicates(
 print(f"  Deduped: {before} → {len(matches)} matches")
 
 # Load Elo ratings
-elo = pd.read_csv(PROCESSED_DIR / "elo_ratings.csv", low_memory=False)
+elo = pd.read_csv(DATA_DIR / "elo_ratings.csv", low_memory=False)
 elo_dict = elo.set_index("player_id").to_dict("index")
 
 # Load player stats
-stats = pd.read_csv(PROCESSED_DIR / "player_stats.csv", low_memory=False)
+stats = pd.read_csv(DATA_DIR / "player_stats.csv", low_memory=False)
 stats_dict = stats.set_index("player_id").to_dict("index")
 
 # Track per-player: last match, last rank, recent results
