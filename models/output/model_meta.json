@@ -1,0 +1,61 @@
+{
+  "created": "2026-03-26T10:33:20.255800",
+  "train_years": "2010-2021",
+  "val_years": "2022-2024",
+  "test_years": "2025+",
+  "features": [
+    "elo_diff",
+    "elo_surf_diff",
+    "p1_elo",
+    "p2_elo",
+    "rank_diff",
+    "log_rank_ratio",
+    "rank_pts_diff",
+    "p1_rank",
+    "p2_rank",
+    "h2h_diff",
+    "h2h_total",
+    "h2h_pct",
+    "form_10_diff",
+    "form_20_diff",
+    "form_50_diff",
+    "form_10_surf_diff",
+    "p1_win_streak",
+    "p2_win_streak",
+    "p1_days_since",
+    "p2_days_since",
+    "p1_matches_90d",
+    "p2_matches_90d",
+    "ace_rate_diff",
+    "first_in_diff",
+    "first_won_diff",
+    "second_won_diff",
+    "bp_save_diff",
+    "age_diff",
+    "height_diff",
+    "hand_matchup",
+    "surface",
+    "round",
+    "tourney_level",
+    "best_of",
+    "is_atp",
+    "implied_prob_p1",
+    "ps_implied_p1"
+  ],
+  "best_iteration": 649,
+  "metrics": {
+    "val": {
+      "accuracy": 0.7934448516373094,
+      "log_loss": 0.42000526956546663,
+      "brier": 0.13808507698254202,
+      "auc": 0.8855664335086728
+    },
+    "test": {
+      "accuracy": 0.7513736263736264,
+      "log_loss": 0.4733004224396119,
+      "brier": 0.15960132805985774,
+      "auc": 0.8473043581634424
+    }
+  },
+  "model_type": "lightgbm"
+}

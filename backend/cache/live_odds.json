@@ -1,0 +1,453 @@
+{
+  "fetched_at": "2026-03-28T12:45:22.273744",
+  "requests_used": 2,
+  "remaining_requests": "468",
+  "tournaments": [
+    "ATP Miami Open",
+    "WTA Miami Open"
+  ],
+  "matches": [
+    {
+      "id": "23816b92085c3bb99a75425a7e466d36",
+      "sport": "tennis_atp_miami_open",
+      "sport_title": "ATP Miami Open",
+      "tour": "atp",
+      "home": "Jiri Lehecka",
+      "away": "Jannik Sinner",
+      "commence_time": "2026-03-29T17:30:00Z",
+      "bookmakers": [
+        {
+          "name": "1xBet",
+          "home_odds": 12.9,
+          "away_odds": 1.05,
+          "last_update": "2026-03-28T07:15:13Z"
+        },
+        {
+          "name": "Ladbrokes",
+          "home_odds": 10.0,
+          "away_odds": 1.06,
+          "last_update": "2026-03-28T07:14:28Z"
+        },
+        {
+          "name": "Unibet (UK)",
+          "home_odds": 9.5,
+          "away_odds": 1.03,
+          "last_update": "2026-03-28T07:15:12Z"
+        },
+        {
+          "name": "Betsson",
+          "home_odds": 11.0,
+          "away_odds": 1.04,
+          "last_update": "2026-03-28T07:14:30Z"
+        },
+        {
+          "name": "Betfair",
+          "home_odds": 14.0,
+          "away_odds": 1.07,
+          "last_update": "2026-03-28T07:14:52Z"
+        },
+        {
+          "name": "Smarkets",
+          "home_odds": 14.01,
+          "away_odds": 1.06,
+          "last_update": "2026-03-28T07:15:01Z"
+        },
+        {
+          "name": "Betfair",
+          "home_odds": 14.0,
+          "away_odds": 1.07,
+          "last_update": "2026-03-28T07:15:01Z"
+        },
+        {
+          "name": "Coral",
+          "home_odds": 10.0,
+          "away_odds": 1.06,
+          "last_update": "2026-03-28T07:15:01Z"
+        },
+        {
+          "name": "Parions Sport (FR)",
+          "home_odds": 7.3,
+          "away_odds": 1.03,
+          "last_update": "2026-03-28T07:14:50Z"
+        },
+        {
+          "name": "Winamax (DE)",
+          "home_odds": 12.5,
+          "away_odds": 1.05,
+          "last_update": "2026-03-28T07:14:51Z"
+        },
+        {
+          "name": "Bet Victor",
+          "home_odds": 8.5,
+          "away_odds": 1.04,
+          "last_update": "2026-03-28T07:14:20Z"
+        },
+        {
+          "name": "Unibet (FR)",
+          "home_odds": 7.3,
+          "away_odds": 1.03,
+          "last_update": "2026-03-28T07:15:01Z"
+        },
+        {
+          "name": "Nordic Bet",
+          "home_odds": 11.0,
+          "away_odds": 1.04,
+          "last_update": "2026-03-28T07:15:01Z"
+        },
+        {
+          "name": "Winamax (FR)",
+          "home_odds": 10.5,
+          "away_odds": 1.04,
+          "last_update": "2026-03-28T07:14:17Z"
+        },
+        {
+          "name": "GTbets",
+          "home_odds": 12.07,
+          "away_odds": 1.06,
+          "last_update": "2026-03-28T07:14:18Z"
+        },
+        {
+          "name": "Grosvenor",
+          "home_odds": 13.0,
+          "away_odds": 1.03,
+          "last_update": "2026-03-28T07:14:28Z"
+        },
+        {
+          "name": "Unibet (SE)",
+          "home_odds": 13.0,
+          "away_odds": 1.03,
+          "last_update": "2026-03-28T07:15:02Z"
+        },
+        {
+          "name": "Unibet (NL)",
+          "home_odds": 13.0,
+          "away_odds": 1.03,
+          "last_update": "2026-03-28T07:14:17Z"
+        },
+        {
+          "name": "LeoVegas (SE)",
+          "home_odds": 13.0,
+          "away_odds": 1.03,
+          "last_update": "2026-03-28T07:14:16Z"
+        },
+        {
+          "name": "Casumo",
+          "home_odds": 13.0,
+          "away_odds": 1.03,
+          "last_update": "2026-03-28T07:14:16Z"
+        },
+        {
+          "name": "Virgin Bet",
+          "home_odds": 11.5,
+          "away_odds": 1.02,
+          "last_update": "2026-03-28T07:15:12Z"
+        },
+        {
+          "name": "LeoVegas",
+          "home_odds": 13.0,
+          "away_odds": 1.03,
+          "last_update": "2026-03-28T07:15:13Z"
+        },
+        {
+          "name": "LiveScore Bet",
+          "home_odds": 13.0,
+          "away_odds": 1.03,
+          "last_update": "2026-03-28T07:14:29Z"
+        },
+        {
+          "name": "Betway",
+          "home_odds": 12.0,
+          "away_odds": 1.03,
+          "last_update": "2026-03-28T07:14:50Z"
+        },
+        {
+          "name": "Pinnacle",
+          "home_odds": 14.03,
+          "away_odds": 1.05,
+          "last_update": "2026-03-28T07:15:13Z"
+        },
+        {
+          "name": "PMU (FR)",
+          "home_odds": 12.0,
+          "away_odds": 1.02,
+          "last_update": "2026-03-28T07:15:01Z"
+        },
+        {
+          "name": "Paddy Power",
+          "home_odds": 14.0,
+          "away_odds": 1.04,
+          "last_update": "2026-03-28T07:14:49Z"
+        },
+        {
+          "name": "Marathon Bet",
+          "home_odds": 12.25,
+          "away_odds": 1.04,
+          "last_update": "2026-03-28T07:14:39Z"
+        },
+        {
+          "name": "Matchbook",
+          "home_odds": 15.0,
+          "away_odds": 1.06,
+          "last_update": "2026-03-28T07:15:12Z"
+        },
+        {
+          "name": "BetOnline.ag",
+          "home_odds": 12.0,
+          "away_odds": 1.05,
+          "last_update": "2026-03-28T07:14:28Z"
+        },
+        {
+          "name": "888sport",
+          "home_odds": 11.0,
+          "away_odds": 1.04,
+          "last_update": "2026-03-28T07:15:01Z"
+        },
+        {
+          "name": "William Hill",
+          "home_odds": 11.0,
+          "away_odds": 1.04,
+          "last_update": "2026-03-28T07:15:01Z"
+        },
+        {
+          "name": "Everygame",
+          "home_odds": 9.0,
+          "away_odds": 1.03,
+          "last_update": "2026-03-28T07:14:50Z"
+        }
+      ],
+      "best_odds": {
+        "home": 15.0,
+        "away": 1.07,
+        "avg_home": 11.8,
+        "avg_away": 1.04
+      }
+    },
+    {
+      "id": "bb544a70410c988a523577e062c0eb4a",
+      "sport": "tennis_wta_miami_open",
+      "sport_title": "WTA Miami Open",
+      "tour": "wta",
+      "home": "Aryna Sabalenka",
+      "away": "Coco Gauff",
+      "commence_time": "2026-03-28T19:00:00Z",
+      "bookmakers": [
+        {
+          "name": "1xBet",
+          "home_odds": 1.38,
+          "away_odds": 3.25,
+          "last_update": "2026-03-28T07:14:16Z"
+        },
+        {
+          "name": "Betfair",
+          "home_odds": 1.39,
+          "away_odds": 3.5,
+          "last_update": "2026-03-28T07:14:50Z"
+        },
+        {
+          "name": "Betfair",
+          "home_odds": 1.39,
+          "away_odds": 3.5,
+          "last_update": "2026-03-28T07:14:50Z"
+        },
+        {
+          "name": "Betway",
+          "home_odds": 1.35,
+          "away_odds": 3.2,
+          "last_update": "2026-03-28T07:14:51Z"
+        },
+        {
+          "name": "GTbets",
+          "home_odds": 1.4,
+          "away_odds": 3.16,
+          "last_update": "2026-03-28T07:14:18Z"
+        },
+        {
+          "name": "Coolbet",
+          "home_odds": 1.37,
+          "away_odds": 3.35,
+          "last_update": "2026-03-28T07:14:29Z"
+        },
+        {
+          "name": "PMU (FR)",
+          "home_odds": 1.3,
+          "away_odds": 3.3,
+          "last_update": "2026-03-28T07:15:12Z"
+        },
+        {
+          "name": "Marathon Bet",
+          "home_odds": 1.37,
+          "away_odds": 3.22,
+          "last_update": "2026-03-28T07:14:16Z"
+        },
+        {
+          "name": "Ladbrokes",
+          "home_odds": 1.33,
+          "away_odds": 3.1,
+          "last_update": "2026-03-28T07:14:28Z"
+        },
+        {
+          "name": "Coral",
+          "home_odds": 1.33,
+          "away_odds": 3.1,
+          "last_update": "2026-03-28T07:14:28Z"
+        },
+        {
+          "name": "Unibet (FR)",
+          "home_odds": 1.35,
+          "away_odds": 3.35,
+          "last_update": "2026-03-28T07:15:01Z"
+        },
+        {
+          "name": "Paddy Power",
+          "home_odds": 1.3,
+          "away_odds": 3.3,
+          "last_update": "2026-03-28T07:13:44Z"
+        },
+        {
+          "name": "Parions Sport (FR)",
+          "home_odds": 1.35,
+          "away_odds": 3.35,
+          "last_update": "2026-03-28T07:14:29Z"
+        },
+        {
+          "name": "Nordic Bet",
+          "home_odds": 1.34,
+          "away_odds": 3.3,
+          "last_update": "2026-03-28T07:15:03Z"
+        },
+        {
+          "name": "Betsson",
+          "home_odds": 1.34,
+          "away_odds": 3.3,
+          "last_update": "2026-03-28T07:14:18Z"
+        },
+        {
+          "name": "Unibet (UK)",
+          "home_odds": 1.33,
+          "away_odds": 3.2,
+          "last_update": "2026-03-28T07:15:01Z"
+        },
+        {
+          "name": "Bet Victor",
+          "home_odds": 1.33,
+          "away_odds": 3.0,
+          "last_update": "2026-03-28T07:13:49Z"
+        },
+        {
+          "name": "Winamax (FR)",
+          "home_odds": 1.34,
+          "away_odds": 3.25,
+          "last_update": "2026-03-28T07:14:51Z"
+        },
+        {
+          "name": "Winamax (DE)",
+          "home_odds": 1.36,
+          "away_odds": 3.35,
+          "last_update": "2026-03-28T07:14:41Z"
+        },
+        {
+          "name": "Matchbook",
+          "home_odds": 1.39,
+          "away_odds": 3.5,
+          "last_update": "2026-03-28T07:14:50Z"
+        },
+        {
+          "name": "Smarkets",
+          "home_odds": 1.36,
+          "away_odds": 3.45,
+          "last_update": "2026-03-28T07:15:02Z"
+        },
+        {
+          "name": "Virgin Bet",
+          "home_odds": 1.35,
+          "away_odds": 3.05,
+          "last_update": "2026-03-28T07:14:40Z"
+        },
+        {
+          "name": "LeoVegas",
+          "home_odds": 1.38,
+          "away_odds": 3.1,
+          "last_update": "2026-03-28T07:15:01Z"
+        },
+        {
+          "name": "Casumo",
+          "home_odds": 1.38,
+          "away_odds": 3.1,
+          "last_update": "2026-03-28T07:14:39Z"
+        },
+        {
+          "name": "Unibet (SE)",
+          "home_odds": 1.38,
+          "away_odds": 3.1,
+          "last_update": "2026-03-28T07:14:17Z"
+        },
+        {
+          "name": "Grosvenor",
+          "home_odds": 1.38,
+          "away_odds": 3.1,
+          "last_update": "2026-03-28T07:14:28Z"
+        },
+        {
+          "name": "Unibet (NL)",
+          "home_odds": 1.38,
+          "away_odds": 3.1,
+          "last_update": "2026-03-28T07:15:12Z"
+        },
+        {
+          "name": "LiveScore Bet",
+          "home_odds": 1.35,
+          "away_odds": 3.05,
+          "last_update": "2026-03-28T07:14:16Z"
+        },
+        {
+          "name": "LeoVegas (SE)",
+          "home_odds": 1.38,
+          "away_odds": 3.1,
+          "last_update": "2026-03-28T07:15:01Z"
+        },
+        {
+          "name": "888sport",
+          "home_odds": 1.36,
+          "away_odds": 3.1,
+          "last_update": "2026-03-28T07:15:12Z"
+        },
+        {
+          "name": "William Hill",
+          "home_odds": 1.36,
+          "away_odds": 3.1,
+          "last_update": "2026-03-28T07:15:01Z"
+        },
+        {
+          "name": "BetOnline.ag",
+          "home_odds": 1.34,
+          "away_odds": 3.37,
+          "last_update": "2026-03-28T07:14:29Z"
+        },
+        {
+          "name": "Pinnacle",
+          "home_odds": 1.38,
+          "away_odds": 3.35,
+          "last_update": "2026-03-28T07:15:02Z"
+        },
+        {
+          "name": "BoyleSports",
+          "home_odds": 1.36,
+          "away_odds": 3.1,
+          "last_update": "2026-03-28T07:15:02Z"
+        },
+        {
+          "name": "Everygame",
+          "home_odds": 1.33,
+          "away_odds": 3.0,
+          "last_update": "2026-03-28T07:14:50Z"
+        }
+      ],
+      "best_odds": {
+        "home": 1.4,
+        "away": 3.5,
+        "avg_home": 1.36,
+        "avg_away": 3.22
+      }
+    }
+  ]
+}

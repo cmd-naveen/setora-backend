@@ -1,0 +1,54 @@
+# Large raw data pipeline (1.5 GB)
+data-pipeline/
+new_venv/
+
+# Generated large files
+*.csv
+*.xlsx
+models/output/simulation/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+.venv/
+env/
+
+# Model files (keep .pkl and .txt in repo — they're the trained model)
+*.joblib
+*.h5
+
+# Secrets & auto-generated cache
+backend/cache/odds_config.json
+backend/cache/news.db
+backend/cache/news.db-shm
+backend/cache/news.db-wal
+
+# Node
+node_modules/
+.next/
+out/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+.claude/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cloudflare
+.wrangler/
