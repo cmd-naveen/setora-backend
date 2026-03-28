@@ -2,10 +2,10 @@
 data-pipeline/
 new_venv/
 
-# Generated large files
-*.csv
-*.xlsx
+# Generated large files (small CSVs in backend/data/ are kept)
+models/output/features.csv
 models/output/simulation/
+*.xlsx
 
 # Python
 __pycache__/
@@ -23,11 +23,13 @@ env/
 *.joblib
 *.h5
 
+# SQLite journal files
+*.db-shm
+*.db-wal
+
 # Secrets & auto-generated cache
 backend/cache/odds_config.json
 backend/cache/news.db
-backend/cache/news.db-shm
-backend/cache/news.db-wal
 
 # Node
 node_modules/

@@ -21,8 +21,10 @@ Usage:
 """
 
 import json
+import os
 import pickle
 import logging
+import sqlite3
 import threading
 import subprocess
 import sys
@@ -49,8 +51,9 @@ log = logging.getLogger("api")
 # ============================================================
 BASE_DIR = Path(__file__).parent
 PROJECT_DIR = BASE_DIR.parent
-DATA_DIR = PROJECT_DIR / "data-pipeline" / "data" / "processed"
+DATA_DIR = BASE_DIR / "data"          # small CSVs + matches.db live here
 MODEL_DIR = PROJECT_DIR / "models" / "output"
+MATCHES_DB = DATA_DIR / "matches.db"  # SQLite H2H database (replaces 145MB CSV)
 
 # ============================================================
 # LOAD DATA & MODEL AT STARTUP
@@ -104,11 +107,8 @@ STATS = pd.read_csv(DATA_DIR / "player_stats.csv", low_memory=False)
 STATS["player_id"] = STATS["player_id"].astype(int)
 STATS_DICT = STATS.set_index("player_id").to_dict("index")
 
-# H2H from matches
-MATCHES = pd.read_csv(DATA_DIR / "matches_clean.csv", low_memory=False,
-                       usecols=["winner_id", "loser_id", "winner_name", "loser_name",
-                                "tourney_date", "tourney_name", "surface", "score", "round"])
-MATCHES["tourney_date"] = pd.to_datetime(MATCHES["tourney_date"], errors="coerce")
+# H2H — queries go through SQLite (matches.db) instead of a 145MB CSV in memory
+# MATCHES_DB path defined above; connections are opened per-request (thread-safe)
 
 # Paper bets storage (in-memory + file persistence)
 PAPER_BETS_FILE = BASE_DIR / "paper_bets.json"
@@ -188,9 +188,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Allow all origins — personal app, no sensitive auth data
+_ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -303,26 +305,33 @@ def get_player_info(player_id: int):
 
 
 def get_h2h(p1_id: int, p2_id: int):
-    m1 = MATCHES[(MATCHES["winner_id"] == p1_id) & (MATCHES["loser_id"] == p2_id)]
-    m2 = MATCHES[(MATCHES["winner_id"] == p2_id) & (MATCHES["loser_id"] == p1_id)]
+    if not MATCHES_DB.exists():
+        return {"p1_wins": 0, "p2_wins": 0, "total": 0, "matches": []}
+    conn = sqlite3.connect(MATCHES_DB)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT * FROM matches WHERE (winner_id=? AND loser_id=?) OR (winner_id=? AND loser_id=?)"
+        " ORDER BY tourney_date DESC LIMIT 20",
+        (p1_id, p2_id, p2_id, p1_id),
+    )
+    rows = cur.fetchall()
+    conn.close()
 
-    matches = []
-    for _, r in pd.concat([m1, m2]).sort_values("tourney_date", ascending=False).head(20).iterrows():
-        matches.append({
-            "date": str(r["tourney_date"].date()) if pd.notna(r["tourney_date"]) else "",
-            "tournament": r.get("tourney_name", ""),
-            "surface": r.get("surface", ""),
-            "round": r.get("round", ""),
-            "winner": r.get("winner_name", ""),
-            "score": r.get("score", ""),
-        })
-
-    return {
-        "p1_wins": len(m1),
-        "p2_wins": len(m2),
-        "total": len(m1) + len(m2),
-        "matches": matches,
-    }
+    p1_wins = sum(1 for r in rows if int(r["winner_id"]) == p1_id)
+    p2_wins = len(rows) - p1_wins
+    matches = [
+        {
+            "date": r["tourney_date"] or "",
+            "tournament": r["tourney_name"] or "",
+            "surface": r["surface"] or "",
+            "round": r["round"] or "",
+            "winner": r["winner_name"] or "",
+            "score": r["score"] or "",
+        }
+        for r in rows
+    ]
+    return {"p1_wins": p1_wins, "p2_wins": p2_wins, "total": p1_wins + p2_wins, "matches": matches}
 
 
 def build_features(p1_id: int, p2_id: int, req: PredictRequest):
@@ -518,12 +527,15 @@ def refresh_status():
 # ROUTES
 # ============================================================
 @app.get("/")
+@app.get("/health")
 def health():
     return {
         "status": "ok",
         "model": MODEL_META["model_type"],
         "train_years": MODEL_META["train_years"],
         "players": len(PLAYERS),
+        "active_players": len(ACTIVE_PLAYERS),
+        "recent_matches": len(RECENT_MATCHES),
         "paper_bets": len(PAPER_BETS),
     }
 
@@ -578,23 +590,29 @@ def get_player(player_id: int):
     if not info:
         raise HTTPException(status_code=404, detail="Player not found")
 
-    # Recent matches
-    recent_w = MATCHES[MATCHES["winner_id"] == player_id].nlargest(10, "tourney_date")
-    recent_l = MATCHES[MATCHES["loser_id"] == player_id].nlargest(10, "tourney_date")
-    recent = pd.concat([recent_w, recent_l]).nlargest(10, "tourney_date")
-
-    info["recent_matches"] = [
-        {
-            "date": str(r["tourney_date"].date()) if pd.notna(r["tourney_date"]) else "",
-            "tournament": r.get("tourney_name", ""),
-            "surface": r.get("surface", ""),
-            "round": r.get("round", ""),
-            "opponent": r["loser_name"] if r["winner_id"] == player_id else r["winner_name"],
-            "result": "W" if r["winner_id"] == player_id else "L",
-            "score": r.get("score", ""),
-        }
-        for _, r in recent.iterrows()
-    ]
+    # Recent matches from SQLite
+    if MATCHES_DB.exists():
+        conn = sqlite3.connect(MATCHES_DB)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT * FROM matches WHERE winner_id=? OR loser_id=? ORDER BY tourney_date DESC LIMIT 10",
+            (player_id, player_id),
+        )
+        recent_rows = cur.fetchall()
+        conn.close()
+        info["recent_matches"] = [
+            {
+                "date": r["tourney_date"] or "",
+                "tournament": r["tourney_name"] or "",
+                "surface": r["surface"] or "",
+                "round": r["round"] or "",
+                "opponent": r["loser_name"] if int(r["winner_id"]) == player_id else r["winner_name"],
+                "result": "W" if int(r["winner_id"]) == player_id else "L",
+                "score": r["score"] or "",
+            }
+            for r in recent_rows
+        ]
 
     return info
 

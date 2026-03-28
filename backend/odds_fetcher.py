@@ -8,6 +8,7 @@ not generic tennis_atp_singles. We dynamically discover active tennis tournament
 """
 
 import json
+import os
 import requests
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -21,6 +22,10 @@ ODDS_API_BASE = "https://api.the-odds-api.com/v4"
 
 
 def load_api_key():
+    # Prefer env var (Railway/production), fall back to local config file
+    env_key = os.environ.get("ODDS_API_KEY", "")
+    if env_key:
+        return env_key
     if ODDS_CONFIG.exists():
         with open(ODDS_CONFIG) as f:
             return json.load(f).get("api_key", "")
